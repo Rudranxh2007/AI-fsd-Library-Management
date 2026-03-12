@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Library Management</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f6fa;
+padding:30px;
+}
+
+h1{
+text-align:center;
+}
+
+form{
+background:white;
+padding:20px;
+margin-bottom:20px;
+border-radius:10px;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin:5px 0;
+}
+
+button{
+background:#2ecc71;
+color:white;
+padding:10px;
+border:none;
+cursor:pointer;
+}
+
+table{
+width:100%;
+background:white;
+border-collapse:collapse;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+text-align:center;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Library Management System</h1>
+
+<form id="bookForm">
+
+<input type="text" id="title" placeholder="Title" required>
+<input type="text" id="author" placeholder="Author" required>
+<input type="text" id="isbn" placeholder="ISBN" required>
+<input type="text" id="genre" placeholder="Genre" required>
+<input type="text" id="publisher" placeholder="Publisher" required>
+<input type="number" id="publicationYear" placeholder="Publication Year">
+<input type="number" id="totalCopies" placeholder="Total Copies">
+<input type="number" id="availableCopies" placeholder="Available Copies">
+<input type="text" id="shelfLocation" placeholder="Shelf Location">
+
+<select id="bookType">
+<option value="Reference">Reference</option>
+<option value="Circulating">Circulating</option>
+</select>
+
+<button type="submit">Add Book</button>
+
+</form>
+
+<h2>Books</h2>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Title</th>
+<th>Author</th>
+<th>Genre</th>
+<th>Publisher</th>
+<th>Status</th>
+<th>Delete</th>
+</tr>
+
+</thead>
+
+<tbody id="bookTable"></tbody>
+
+</table>
+
+<script>
+
+const api="http://localhost:9090/api/books"
+
+document.getElementById("bookForm").addEventListener("submit",async(e)=>{
+
+e.preventDefault()
+
+const data={
+
+title:document.getElementById("title").value,
+author:document.getElementById("author").value,
+isbn:document.getElementById("isbn").value,
+genre:document.getElementById("genre").value,
+publisher:document.getElementById("publisher").value,
+publicationYear:document.getElementById("publicationYear").value,
+totalCopies:document.getElementById("totalCopies").value,
+availableCopies:document.getElementById("availableCopies").value,
+shelfLocation:document.getElementById("shelfLocation").value,
+bookType:document.getElementById("bookType").value
+
+}
+
+await fetch(api,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(data)
+})
+
+loadBooks()
+
+})
+
+async function loadBooks(){
+
+const res=await fetch(api)
+const books=await res.json()
+
+let html=""
+
+books.forEach(book=>{
+
+html+=`
+<tr>
+<td>${book.title}</td>
+<td>${book.author}</td>
+<td>${book.genre}</td>
+<td>${book.publisher}</td>
+<td>${book.status}</td>
+<td>
+<button onclick="deleteBook('${book._id}')">Delete</button>
+</td>
+</tr>
+`
+
+})
+
+document.getElementById("bookTable").innerHTML=html
+
+}
+
+async function deleteBook(id){
+
+await fetch(api+"/"+id,{
+method:"DELETE"
+})
+
+loadBooks()
+
+}
+
+loadBooks()
+
+</script>
+
+</body>
+</html>
